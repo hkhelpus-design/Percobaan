@@ -1,1 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BoostPanel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:sans-serif;background:#111;color:white;text-align:center;padding:20px}
+input,select,button{padding:10px;margin:5px;border:none;border-radius:6px}
+button{background:purple;color:white;cursor:pointer}
+.card{background:#1c1c1c;padding:20px;border-radius:10px;margin-top:20px}
+</style>
+</head>
+<body>
 
+<div id="app"></div>
+
+<script>
+let app=document.getElementById("app");
+
+function showLogin(){
+app.innerHTML=`
+<h2>Login</h2>
+<input id="user" placeholder="Username"><br>
+<input type="password" id="pass" placeholder="Password"><br>
+<button onclick="login()">Login</button>
+<p>Belum punya akun?</p>
+<button onclick="showRegister()">Register</button>
+`;
+}
+
+function showRegister(){
+app.innerHTML=`
+<h2>Register</h2>
+<input id="user" placeholder="Username"><br>
+<input type="password" id="pass" placeholder="Password"><br>
+<button onclick="register()">Daftar</button>
+`;
+}
+
+function register(){
+let u=user.value;
+let p=pass.value;
+localStorage.setItem("user_"+u,p);
+localStorage.setItem("saldo_"+u,20000);
+alert("Akun dibuat! Saldo 20.000");
+showLogin();
+}
+
+function login(){
+let u=user.value;
+let p=pass.value;
+if(localStorage.getItem("user_"+u)==p){
+localStorage.setItem("activeUser",u);
+showDashboard();
+}else{
+alert("Login gagal!");
+}
+}
+
+function showDashboard(){
+let user=localStorage.getItem("activeUser");
+let saldo=localStorage.getItem("saldo_"+user);
+
+app.innerHTML=`
+<div class="card">
+<h2>Dashboard</h2>
+<p>Saldo: Rp ${saldo}</p>
+<button onclick="showOrder()">Order</button>
+<button onclick="logout()">Logout</button>
+</div>
+`;
+}
+
+function showOrder(){
+app.innerHTML=`
+<div class="card">
+<h2>Order</h2>
+<select id="service">
+<option value="11000">Roblox Followers (200) - 11.000</option>
+<option value="10000">Instagram Followers (1000) - 10.000</option>
+<option value="9000">TikTok Followers (1000) - 9.000</option>
+<option value="12000">YouTube Subscribers (1000) - 12.000</option>
+</select><br>
+<input type="number" id="jumlah" placeholder="Jumlah"><br>
+<button onclick="order()">Order Sekarang</button>
+<button onclick="showDashboard()">Kembali</button>
+</div>
+`;
+}
+
+function order(){
+let user=localStorage.getItem("activeUser");
+let saldo=parseInt(localStorage.getItem("saldo_"+user));
+let harga=parseInt(service.value);
+let jumlah=parseInt(document.getElementById("jumlah").value);
+
+if(!jumlah){alert("Isi jumlah!");return;}
+
+if(service.selectedIndex==0 && jumlah%200!=0){
+alert("Roblox wajib kelipatan 200!");
+return;
+}
+
+if(saldo<harga){
+alert("Saldo tidak cukup!");
+return;
+}
+
+localStorage.setItem("saldo_"+user,saldo-harga);
+alert("Order berhasil!");
+showDashboard();
+}
+
+function logout(){
+localStorage.removeItem("activeUser");
+showLogin();
+}
+
+if(localStorage.getItem("activeUser")){
+showDashboard();
+}else{
+showLogin();
+}
+</script>
+
+</body>
+</html>
