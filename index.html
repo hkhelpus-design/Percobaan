@@ -41,8 +41,8 @@ function register(){
 let u=user.value;
 let p=pass.value;
 localStorage.setItem("user_"+u,p);
-localStorage.setItem("saldo_"+u,20000);
-alert("Akun dibuat! Saldo 20.000");
+localStorage.setItem("saldo_"+u,"0");
+alert("Akun dibuat! Saldo 2");
 showLogin();
 }
 
