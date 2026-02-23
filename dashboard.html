@@ -1,61 +1,94 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html>
 <head>
-  <title>BLOXTOP - Dashboard</title>
+<title>BLOXTOP - Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:sans-serif;background:#121212;color:white;text-align:center;padding:20px;}
+button{padding:10px;margin:5px;border:none;border-radius:6px;background:purple;color:white;cursor:pointer;}
+.card{background:#1e1e2f;padding:20px;border-radius:10px;margin:20px auto;width:340px;box-shadow:0 0 15px rgba(0,0,0,0.5);}
+img.qris{width:250px;margin:10px auto;display:block;border-radius:10px;}
+.copyBtn{background:#b57cff;color:white;padding:6px 12px;margin-top:5px;cursor:pointer;border-radius:5px;}
+.status{margin-top:10px;font-size:14px;color:#ffb74d;}
+</style>
 </head>
-<body style="background:#121212;font-family:Arial;">
+<body>
 
-<div style="background:#1e1e2f;padding:20px;border-radius:10px;color:white;width:300px;margin:100px auto;text-align:center;box-shadow:0 0 10px rgba(0,0,0,0.5);">
-
+<div class="card">
   <h2 style="color:#b57cff;">Saldo Kamu</h2>
-
   <h1 id="saldoText">Rp 0</h1>
 
-  <button onclick="topup()" 
-    style="background:purple;color:white;padding:10px 15px;border:none;border-radius:6px;cursor:pointer;">
-    Topup Saldo
-  </button>
+  <button onclick="requestTopup()">Request Topup</button>
+  
+  <div id="qrisContainer" style="display:none;">
+    <p>Scan QRIS dibawah untuk bayar:</p>
+    <img id="qrisImage" class="qris" src="">
+    <p>Nominal: <span id="nominalText"></span></p>
+    <button class="copyBtn" onclick="copyNominal()">Copy Nominal</button>
+  </div>
 
+  <p id="statusTopup" class="status"></p>
 </div>
 
 <script>
-
-// kalau belum ada user login, bikin default
+// User default
 if(!localStorage.getItem("loginUser")){
   localStorage.setItem("loginUser","guest");
 }
-
 let username = localStorage.getItem("loginUser");
 
-// tampilkan saldo
+// Tampilkan saldo & status
 function tampilSaldo(){
   let saldo = parseInt(localStorage.getItem("saldo_"+username)) || 0;
-  document.getElementById("saldoText").innerText = 
-    "Rp " + saldo.toLocaleString("id-ID");
-}
+  document.getElementById("saldoText").innerText = "Rp " + saldo.toLocaleString("id-ID");
 
+  let status = localStorage.getItem("status_"+username);
+  if(status){
+    document.getElementById("statusTopup").innerText = "Status Topup: " + status;
+  } else {
+    document.getElementById("statusTopup").innerText = "";
+  }
+}
 tampilSaldo();
 
-// fungsi topup
-function topup(){
-  let nominal = prompt("Masukkan nominal topup:");
+// Copy nominal
+function copyNominal(){
+  let nominal = localStorage.getItem("request_"+username);
+  navigator.clipboard.writeText(nominal).then(()=>{
+    alert("Nominal "+parseInt(nominal).toLocaleString("id-ID")+" berhasil dicopy!");
+  });
+}
 
-  if(!nominal || isNaN(nominal)){
-    alert("Nominal tidak valid!");
+// Request topup
+function requestTopup(){
+  let nominal = prompt("Masukkan nominal topup (minimal Rp 15.000):");
+
+  if(!nominal || isNaN(nominal) || parseInt(nominal) < 15000){
+    alert("Nominal tidak valid atau kurang dari Rp 15.000!");
     return;
   }
 
   nominal = parseInt(nominal);
 
-  let saldo = parseInt(localStorage.getItem("saldo_"+username)) || 0;
-  saldo += nominal;
+  // QRIS asli
+  let qrisUrl = "https://image2url.com/r2/default/images/1771876363487-f1fee281-40d9-4107-bc34-17fd76928156.jpeg";
+  document.getElementById("qrisImage").src = qrisUrl;
+  document.getElementById("nominalText").innerText = "Rp " + nominal.toLocaleString("id-ID");
+  document.getElementById("qrisContainer").style.display = "block";
 
-  localStorage.setItem("saldo_"+username, saldo);
+  // simpan request
+  localStorage.setItem("request_"+username, nominal);
+  localStorage.setItem("status_"+username, "Menunggu Konfirmasi");
 
-  alert("Topup berhasil!");
   tampilSaldo();
 }
 
+// Contoh admin menambahkan saldo:
+// buka console browser → ketik:
+// let saldo = parseInt(localStorage.getItem("saldo_guest")||0);
+// localStorage.setItem("saldo_guest", saldo+50000);
+// localStorage.removeItem("status_guest");
+// location.reload();
 </script>
 
 </body>
